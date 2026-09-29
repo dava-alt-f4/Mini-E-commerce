@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Actions\AddProductToCart;
 use App\Http\Requests\AddToCartRequest;
+use App\Http\Resources\CartResource;
+use App\Models\Cart;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -11,9 +13,12 @@ class CartController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $cart = Cart::with('cartItems.product')
+            ->firstOrCreate(['user_id' => $request->user()->id]);
+
+        return new CartResource($cart);
     }
 
     /**
