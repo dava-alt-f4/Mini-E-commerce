@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
-use App\Actions\AuthenticateUser;
-use App\Http\Requests\LoginRequest;
+use App\Actions\Auth\AuthenticateUser;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\LoginRequest;
 
 class LoginController extends Controller
 {

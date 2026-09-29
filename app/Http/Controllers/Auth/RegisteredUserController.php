@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
-use App\Actions\CreateNewUser;
-use App\Http\Requests\RegisterRequest;
+use App\Actions\Auth\CreateNewUser;
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\RegisterRequest;
 
 class RegisteredUserController extends Controller
 {

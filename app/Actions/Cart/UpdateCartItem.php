@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Actions;
+namespace App\Actions\Cart;
 
 use App\Models\Cart;
-use App\Models\CartItem;
 use App\Models\User;
 
 class UpdateCartItem

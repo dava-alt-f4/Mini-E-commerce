@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Actions;
+namespace App\Actions\Cart;
 
 use App\Models\Cart;
 use App\Models\User;
@@ -18,4 +18,3 @@ class RemoveCartItem
         return ['message' => 'Cart item removed successfully.'];
     }
 }
-

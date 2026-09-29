@@ -2,14 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Actions\AddProductToCart;
-use App\Actions\RemoveCartItem;
-use App\Actions\UpdateCartItem;
-use App\Http\Requests\AddToCartRequest;
-use App\Http\Resources\CartResource;
+use App\Actions\Cart\AddProductToCart;
+use App\Actions\Cart\RemoveCartItem;
+use App\Actions\Cart\UpdateCartItem;
+use App\Http\Requests\Cart\AddToCartRequest;
+use App\Http\Resources\Cart\CartResource;
 use App\Models\Cart;
-use App\Models\CartItem;
-use App\Models\User;
 use Illuminate\Http\Request;
 
 class CartController extends Controller

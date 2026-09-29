@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Resources;
+namespace App\Http\Resources\Cart;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-class OrderItemResource extends JsonResource
+class CartItemResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -16,10 +16,10 @@ class OrderItemResource extends JsonResource
     {
         return [
             'id' => $this->id,
-            'product_name' => $this->whenLoaded('product', fn () => $this->product->name),
+            'name' => $this->product->name,
+            'price' => $this->product->price,
             'quantity' => $this->quantity,
-            'price' => $this->price,
-            'subtotal' => $this->quantity * $this->price,
+            'subtotal' => $this->product->price * $this->quantity,
         ];
     }
 }
