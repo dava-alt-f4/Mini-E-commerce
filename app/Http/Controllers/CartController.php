@@ -3,9 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Actions\AddProductToCart;
+use App\Actions\RemoveCartItem;
+use App\Actions\UpdateCartItem;
 use App\Http\Requests\AddToCartRequest;
 use App\Http\Resources\CartResource;
 use App\Models\Cart;
+use App\Models\CartItem;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class CartController extends Controller
@@ -44,18 +48,29 @@ class CartController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update quantity of the item in the cart.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, int $id, UpdateCartItem $updateCartItem)
     {
-        //
+        $request->validate([
+            'quantity' => 'required|integer|min:1',
+        ]);
+
+        $result = $updateCartItem->execute($request->user(), $id, $request->input('quantity'));
+
+        return response()->json([
+            'message' => 'Cart item updated successfully.',
+            'data' => $result,
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, int $id, RemoveCartItem $removeCartItem)
     {
-        //
+        $result = $removeCartItem->execute($request->user(), $id);
+
+        return response()->json($result);
     }
 }
