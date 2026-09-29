@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\LoginController;
 use App\Http\Controllers\LogoutController;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\RegisteredUserController;
 use Illuminate\Http\Request;
@@ -22,4 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::apiResource('products', ProductController::class)->only(['index', 'show']);
     Route::apiResource('cart', CartController::class);
+
+    Route::post('/checkout', CheckoutController::class);
+
+    Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
 });
