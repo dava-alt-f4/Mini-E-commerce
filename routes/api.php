@@ -19,7 +19,7 @@ Route::get('/user', function (Request $request) {
 
 Route::prefix('auth')->group(function () {
     Route::post('/register', RegisteredUserController::class);
-    Route::post('/login', LoginController::class);
+    Route::post('/login', LoginController::class)->middleware('throttle:login');
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -28,7 +28,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('products', ProductController::class)->only(['index', 'show']);
     Route::apiResource('cart', CartController::class);
 
-    Route::post('/checkout', CheckoutController::class);
+    Route::post('/checkout', CheckoutController::class)->middleware('throttle:checkout');
 
     Route::apiResource('orders', OrderController::class)->only(['index', 'show']);
 
@@ -40,4 +40,4 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-Route::post('/webhooks/payment', PaymentWebhookController::class);
+Route::post('/webhooks/payment', PaymentWebhookController::class)->middleware('throttle:webhook');
