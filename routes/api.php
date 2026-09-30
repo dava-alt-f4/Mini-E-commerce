@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -33,5 +34,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::apiResource('products', AdminProductController::class)->only(['store', 'update', 'destroy'])->names('product');
+
+        Route::apiResource('orders', AdminOrderController::class)->only('index', 'show', 'update');
     });
 });
