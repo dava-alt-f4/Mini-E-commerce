@@ -4,6 +4,7 @@ namespace App\Http\Requests\Product;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateProductRequest extends FormRequest
 {
@@ -23,8 +24,14 @@ class UpdateProductRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'category_id' => 'sometimes|exists:categories,id',
             'name' => 'sometimes|string|max:255',
-            'slug' => 'sometimes|string|max:255|unique:products,slug',
+            'slug' => [
+                'sometimes',
+                'string',
+                'max:255',
+                Rule::unique('products', 'slug')->ignore($this->route('product')),
+            ],
             'description' => 'nullable|string',
             'price' => 'sometimes|numeric|min:0',
             'stock' => 'sometimes|integer|min:0',
