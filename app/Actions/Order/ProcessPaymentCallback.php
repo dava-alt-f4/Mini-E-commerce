@@ -7,35 +7,57 @@ use Illuminate\Support\Facades\Log;
 
 class ProcessPaymentCallback
 {
-    public function execute(array $payload, ?string $signature)
+    public function execute(array $payload, ?string $signature = null)
     {
-        if (! isset($payload['order_id']) || ! isset($payload['status'])) {
-            return ['error' => 'Invalid payload format.', 'code' => 400];
+        $orderId = $payload['order_id'] ?? null;
+        $statusCode = $payload['status_code'] ?? null;
+        $grossAmount = $payload['gross_amount'] ?? null;
+        $incomingSignature = $payload['signature_key'] ?? null;
+
+        if (! $orderId || ! $statusCode || ! $grossAmount || ! $incomingSignature) {
+            return ['error' => 'Invalid payload format from Midtrans.', 'code' => 400];
         }
 
-        $secretKey = config('services.payment.secret_key');
-        $stringToHash = (string) $payload['order_id'].(string) $payload['status'];
-        $expectedSignature = hash_hmac('sha256', $stringToHash, $secretKey);
+        $serverKey = config('services.midtrans.server_key');
 
-        Log::info('Debug Signature:', [
-            'payload_string' => $payload['order_id'].$payload['status'],
-            'secret_key_used' => $secretKey,
+        $stringToHash = $orderId . $statusCode . $grossAmount . $serverKey;
+        $expectedSignature = hash('sha512', $stringToHash);
+
+        Log::info('Midtrans Webhook Debug:', [
+            'order_id' => $orderId,
+            'status_code' => $statusCode,
+            'gross_amount' => $grossAmount,
             'generated_signature' => $expectedSignature,
-            'incoming_signature' => $signature,
+            'incoming_signature' => $incomingSignature,
         ]);
 
-        if (! hash_equals($expectedSignature, (string) $signature)) {
-            return ['error' => 'Invalid signature.', 'code' => 401];
+        if (! hash_equals($expectedSignature, (string) $incomingSignature)) {
+            return ['error' => 'Invalid signature key.', 'code' => 401];
         }
 
-        $order = Order::find($payload['order_id']);
+        $order = Order::where('order_number', $orderId)->first();
+
         if (! $order) {
             return ['error' => 'Order not found.', 'code' => 404];
         }
 
-        if ($payload['status'] === 'success') {
+        $transactionStatus = $payload['transaction_status'] ?? '';
+        $type = $payload['payment_type'] ?? '';
+        $fraudStatus = $payload['fraud_status'] ?? '';
+
+        if ($transactionStatus == 'capture') {
+            if ($type == 'credit_card') {
+                if ($fraudStatus == 'challenge') {
+                    $order->update(['status' => 'pending']);
+                } else {
+                    $order->update(['status' => 'paid']);
+                }
+            }
+        } elseif ($transactionStatus == 'settlement') {
             $order->update(['status' => 'paid']);
-        } elseif ($payload['status'] === 'failed' || $payload['status'] === 'expired') {
+        } elseif ($transactionStatus == 'pending') {
+            $order->update(['status' => 'pending']);
+        } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
             $order->update(['status' => 'cancelled']);
         }
 

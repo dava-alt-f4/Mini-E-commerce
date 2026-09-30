@@ -20,6 +20,7 @@ class OrderResource extends JsonResource
             'order_number' => $this->order_number,
             'total_price' => $this->total_price,
             'status' => $this->status,
+            'snap_url' => $this->snap_url,
             'order_date' => $this->created_at->format('Y-m-d H:i:s'),
             'items' => OrderItemResource::collection($this->whenLoaded('orderItems')),
         ];

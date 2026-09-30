@@ -6,6 +6,8 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Midtrans\Config;
+use Midtrans\Snap;
 
 class CheckoutCart
 {
@@ -17,23 +19,56 @@ class CheckoutCart
             return ['message' => 'Cart is empty.'];
         }
 
+        Config::$serverKey = config('services.midtrans.server_key');
+        Config::$isProduction = config('services.midtrans.is_production');
+        Config::$isSanitized = config('services.midtrans.is_sanitized');
+        Config::$is3ds = config('services.midtrans.is_3ds');
+
         return DB::transaction(function () use ($user, $cart) {
+            $totalPrice = $this->calculateTotalAmount($cart);
+            $orderNumber = $this->createOrderNumber();
+
             $order = Order::create([
-                'order_number' => $this->createOrderNumber(),
+                'order_number' => $orderNumber,
                 'user_id' => $user->id,
-                'total_price' => $this->calculateTotalAmount($cart),
+                'total_price' => $totalPrice,
                 'status' => 'pending',
             ]);
 
-            $orderItemsData = $cart->cartItems->map(function ($item) {
+            $itemDetails = [];
+
+            $orderItemsData = $cart->cartItems->map(function ($item) use (&$itemDetails) {
+                $itemDetails[] = [
+                    'id' => (string) $item->product_id,
+                    'price' => (int) $item->product->price,
+                    'quantity' => $item->quantity,
+                    'name' => substr($item->product->name, 0, 50),
+                ];
+
                 return [
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
-                    'price' => $item->product->price, // Historical price
+                    'price' => $item->product->price,
                 ];
             });
 
             $order->orderItems()->createMany($orderItemsData->toArray());
+            $params = [
+                'transaction_details' => [
+                    'order_id' => $order->order_number,
+                    'gross_amount' => (int) $totalPrice,
+                ],
+                'item_details' => $itemDetails,
+                'customer_details' => [
+                    'first_name' => $user->name,
+                    'email' => $user->email,
+                ],
+            ];
+
+            $snapUrl = Snap::getSnapUrl($params);
+
+            $order->update(['snap_url' => $snapUrl]);
+
             $cart->cartItems()->delete();
 
             return $order->load(['user', 'orderItems.product']);
