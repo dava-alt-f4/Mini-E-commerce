@@ -41,6 +41,10 @@ class ProcessPaymentCallback
             return ['error' => 'Order not found.', 'code' => 404];
         }
 
+        if (in_array($order->status, ['paid', 'cancelled'])) {
+            return $order;
+        }
+
         $transactionStatus = $payload['transaction_status'] ?? '';
         $type = $payload['payment_type'] ?? '';
         $fraudStatus = $payload['fraud_status'] ?? '';
@@ -59,8 +63,21 @@ class ProcessPaymentCallback
             $order->update(['status' => 'pending']);
         } elseif (in_array($transactionStatus, ['deny', 'expire', 'cancel'])) {
             $order->update(['status' => 'cancelled']);
+            $this->restockProduct($order);
         }
 
         return $order;
+    }
+
+    private function restockProduct(Order $order)
+    {
+       $order->load('orderItems.product');
+
+        foreach ($order->orderItems as $item)
+            {
+                if ($item->product) {
+                $item->product->increment('stock', $item->quantity);
+            }
+            }
     }
 }
