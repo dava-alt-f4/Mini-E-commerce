@@ -4,7 +4,9 @@ namespace App\Actions\Checkout;
 
 use App\Models\Cart;
 use App\Models\Order;
+use App\Models\Product;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\DB;
 use Midtrans\Config;
 use Midtrans\Snap;
@@ -36,8 +38,17 @@ class CheckoutCart
             ]);
 
             $itemDetails = [];
+            $orderItemsData = [];
 
-            $orderItemsData = $cart->cartItems->map(function ($item) use (&$itemDetails) {
+            foreach ($cart->cartItems as $item) {
+                $product = Product::lockForUpdate()->find($item->product_id);
+
+                if (!$product || $product->stock < $item->quantity) {
+                    abort(422, "Insufficient stock for product '{$item->product->name}'.");
+                }
+
+                $product->decrement('stock', $item->quantity);
+
                 $itemDetails[] = [
                     'id' => (string) $item->product_id,
                     'price' => (int) $item->product->price,
@@ -45,14 +56,15 @@ class CheckoutCart
                     'name' => substr($item->product->name, 0, 50),
                 ];
 
-                return [
+                $orderItemsData[] = [
                     'product_id' => $item->product_id,
                     'quantity' => $item->quantity,
                     'price' => $item->product->price,
                 ];
-            });
+            }
 
-            $order->orderItems()->createMany($orderItemsData->toArray());
+            $order->orderItems()->createMany($orderItemsData);
+
             $params = [
                 'transaction_details' => [
                     'order_id' => $order->order_number,
