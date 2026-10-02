@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\TrashedCategoryController;
+use App\Http\Controllers\Admin\TrashedProductController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
 use App\Http\Controllers\Auth\RegisteredUserController;
@@ -36,12 +38,14 @@ Route::middleware('auth:sanctum')->group(function () {
     // Admin
     Route::middleware('admin')->prefix('admin')->group(function () {
         Route::apiResource('categories', AdminCategoryController::class)->only(['store', 'update', 'destroy'])->names('category');
+        Route::apiResource('categories/trashed', TrashedCategoryController::class)->except('destroy', 'store');
+
         Route::apiResource('products', AdminProductController::class)->only(['store', 'update', 'destroy'])->names('product');
+        Route::apiResource('products/trashed', TrashedProductController::class)->except('destroy', 'store');
 
         Route::apiResource('orders', AdminOrderController::class)->only('index', 'show', 'update');
     });
 });
-
 
 Route::apiResource('categories', CategoryController::class)->only(['index', 'show']);
 Route::apiResource('products', ProductController::class)->only(['index', 'show']);
