@@ -6,7 +6,6 @@ use App\Models\Cart;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use Exception;
 use Illuminate\Support\Facades\DB;
 use Midtrans\Config;
 use Midtrans\Snap;
@@ -43,7 +42,7 @@ class CheckoutCart
             foreach ($cart->cartItems as $item) {
                 $product = Product::lockForUpdate()->find($item->product_id);
 
-                if (!$product || $product->stock < $item->quantity) {
+                if (! $product || $product->stock < $item->quantity) {
                     abort(422, "Insufficient stock for product '{$item->product->name}'.");
                 }
 

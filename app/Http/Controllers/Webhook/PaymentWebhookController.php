@@ -23,6 +23,7 @@ class PaymentWebhookController extends Controller
 
         if (isset($result['error'])) {
             Log::warning('Payment Webhook Failed', ['reason' => $result['error']]);
+
             return response()->json(['message' => $result['error']], $result['code']);
         }
 

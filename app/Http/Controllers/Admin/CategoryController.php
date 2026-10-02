@@ -8,7 +8,6 @@ use App\Actions\Category\UpdateCategory;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Category\CreateCategoryRequest;
 use App\Http\Requests\Category\UpdateCategoryRequest;
-use App\Models\Category;
 
 class CategoryController extends Controller
 {

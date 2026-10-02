@@ -15,10 +15,9 @@ class AddProductToCart
         $cartItem = $cart->cartItems()->firstOrNew(['product_id' => $productId]);
         $product = Product::findOrFail($productId);
 
-        if (($cartItem->quantity += $quantity) > $product->stock)
-            {
-                abort(422, "Only {$cartItem->product->stock} left in stock");
-            }
+        if (($cartItem->quantity += $quantity) > $product->stock) {
+            abort(422, "Only {$cartItem->product->stock} left in stock");
+        }
 
         $cartItem->save();
 

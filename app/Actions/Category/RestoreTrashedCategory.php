@@ -8,10 +8,10 @@ class RestoreTrashedCategory
 {
     public function execute(int $categoryId)
     {
-       $category = Category::onlyTrashed()->findOrFail($categoryId);
+        $category = Category::onlyTrashed()->findOrFail($categoryId);
 
-       $category->restore();
+        $category->restore();
 
-       return $category;
+        return $category;
     }
 }

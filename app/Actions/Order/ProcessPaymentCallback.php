@@ -20,7 +20,7 @@ class ProcessPaymentCallback
 
         $serverKey = config('services.midtrans.server_key');
 
-        $stringToHash = $orderId . $statusCode . $grossAmount . $serverKey;
+        $stringToHash = $orderId.$statusCode.$grossAmount.$serverKey;
         $expectedSignature = hash('sha512', $stringToHash);
 
         Log::info('Midtrans Webhook Debug:', [
@@ -71,13 +71,12 @@ class ProcessPaymentCallback
 
     private function restockProduct(Order $order)
     {
-       $order->load('orderItems.product');
+        $order->load('orderItems.product');
 
-        foreach ($order->orderItems as $item)
-            {
-                if ($item->product) {
+        foreach ($order->orderItems as $item) {
+            if ($item->product) {
                 $item->product->increment('stock', $item->quantity);
             }
-            }
+        }
     }
 }

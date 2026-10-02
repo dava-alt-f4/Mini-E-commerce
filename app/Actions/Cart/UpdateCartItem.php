@@ -13,10 +13,9 @@ class UpdateCartItem
 
         $cartItem = $cart->cartItems()->findOrFail($cartItemId);
 
-        if ($quantity > $cartItem->product->stock)
-            {
-                abort(422, "Only {$cartItem->product->stock} left in stock");
-            }
+        if ($quantity > $cartItem->product->stock) {
+            abort(422, "Only {$cartItem->product->stock} left in stock");
+        }
 
         $cartItem->quantity = $quantity;
         $cartItem->save();

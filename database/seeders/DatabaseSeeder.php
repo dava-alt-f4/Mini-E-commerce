@@ -3,10 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Cart;
-use App\Models\CartItem;
 use App\Models\Category;
 use App\Models\Order;
-use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -33,7 +31,7 @@ class DatabaseSeeder extends Seeder
             ->hasCartItems(3, function () use ($products) {
                 return [
                     'product_id' => $products->random()->id,
-                    'quantity' => fake()->numberBetween(1, 5)
+                    'quantity' => fake()->numberBetween(1, 5),
                 ];
             })
             ->create();
